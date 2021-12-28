@@ -1,0 +1,67 @@
+{
+  "name": "online-learning",
+  "version": "1.0.0",
+  "description": "online teaching and learning platform",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon -q -r dotenv/config src/index.js",
+    "test": "jest --setupFiles dotenv/config --watchAll --no-cache"
+  },
+  "_moduleAliases": {
+    "@app": "src/app.js",
+    "@models": "src/models",
+    "@shared": "src/shared"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "./jest.setup.js"
+    ],
+    "moduleNameMapper": {
+      "@app": "<rootDir>/src/app.js",
+      "@models/(.*)": "<rootDir>/src/models/$1",
+      "@shared/(.*)": "<rootDir>/src/shared/$1"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phyokyawdev/online-learning.git"
+  },
+  "keywords": [
+    "teaching",
+    "learning"
+  ],
+  "author": "Phyo Kyaw <phyokyawdev@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/phyokyawdev/online-learning/issues"
+  },
+  "homepage": "https://github.com/phyokyawdev/online-learning#readme",
+  "dependencies": {
+    "compression": "^1.7.4",
+    "cookie-session": "^1.4.0",
+    "express": "^4.17.1",
+    "express-actuator": "^1.8.0",
+    "express-async-errors": "^3.1.1",
+    "express-validator": "^6.14.0",
+    "helmet": "^4.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "module-alias": "^2.2.2",
+    "mongoose": "^6.0.12",
+    "passport": "^0.5.0",
+    "passport-custom": "^1.1.1",
+    "passport-jwt": "^4.0.0",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5",
+    "winston-loggly-bulk": "^3.2.1"
+  },
+  "devDependencies": {
+    "debug": "^4.3.2",
+    "dotenv": "^10.0.0",
+    "jest": "^27.3.1",
+    "mongodb-memory-server": "^7.5.1",
+    "nodemon": "^2.0.14",
+    "supertest": "^6.1.6"
+  }
+}
