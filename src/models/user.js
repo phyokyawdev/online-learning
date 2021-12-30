@@ -1,11 +1,8 @@
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-const { hashPassword, checkPasswords } = require("@shared/services/password");
-const { UserCourse } = require("./user_course");
 
-const jwtPrivateKey = process.env.JWT_PRIVATE_KEY.replace(/\\n/gm, "\n");
-const jwtExpiresIn = process.env.JWT_EXPIRES_IN;
-const jwtAlgorithm = process.env.JWT_ALGORITHM;
+const { hashPassword, checkPasswords } = require("@shared/services/password");
+const { generateAuthToken } = require("@shared/services/auth-token");
+const { UserCourse } = require("./user_course");
 
 /**
  * User
@@ -40,7 +37,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["basic", "admin", "student", "teacher"],
+      enum: ["basic", "admin", "teacher"],
       default: "basic",
     },
     user_courses: {
@@ -50,7 +47,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     toJSON: {
-      transform(doc, ret) {
+      transform(_, ret) {
         ret.id = ret._id;
         delete ret._id;
         delete ret.password;
@@ -69,30 +66,19 @@ userSchema.pre("save", async function (done) {
   done();
 });
 
+/** Instance methods */
 userSchema.methods.checkPassword = async function (suppliedPassword) {
   const isValid = await checkPasswords(this.password, suppliedPassword);
   return isValid;
 };
 
 userSchema.methods.generateAuthToken = async function () {
-  return new Promise((resolve, reject) => {
-    const payload = { id: this._id, role: this.role };
-
-    jwt.sign(
-      payload,
-      jwtPrivateKey,
-      {
-        expiresIn: jwtExpiresIn,
-        algorithm: jwtAlgorithm,
-      },
-      (err, token) => {
-        if (err) return reject(err);
-        else return resolve(token);
-      }
-    );
-  });
+  const payload = { id: this._id, role: this.role };
+  const token = await generateAuthToken(payload);
+  return token;
 };
 
+/** Static methods */
 userSchema.statics.isExistingUser = async function (id) {
   const user = await this.findById(id);
   if (!user) return false;

@@ -5,7 +5,7 @@ const { body } = require("express-validator");
 
 const { ConflictError } = require("@shared/errors");
 const { validateRequest } = require("@shared/middlewares");
-const { setAuthTokenForRequest } = require("@shared/services/auth-token");
+const { setAuthTokenToRequest } = require("@shared/services/auth-token");
 
 router.post(
   "/signup",
@@ -27,7 +27,7 @@ router.post(
         return next(err);
       }
 
-      setAuthTokenForRequest(req, token);
+      setAuthTokenToRequest(req, token);
 
       res.status(201).send(user);
     })(req, res, next);

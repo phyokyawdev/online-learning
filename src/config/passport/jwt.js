@@ -1,23 +1,9 @@
 const passport = require("passport");
 const { Strategy } = require("passport-jwt");
 
-const jwtPublicKey = process.env.JWT_PUBLIC_KEY.replace(/\\n/gm, "\n");
-const jwtAlgorithm = process.env.JWT_ALGORITHM;
-const jwtName = process.env.JWT_NAME;
+const { getPassportJWTOptions } = require("@shared/services/auth-token");
 
-const cookieExtractor = (req) => {
-  let token = null;
-  if (req && req.session) {
-    token = req.session[jwtName];
-  }
-  return token;
-};
-
-const options = {
-  jwtFromRequest: cookieExtractor,
-  secretOrKey: jwtPublicKey,
-  algorithms: [jwtAlgorithm],
-};
+const options = getPassportJWTOptions();
 
 /**
  * check jwt
@@ -28,17 +14,26 @@ const options = {
  * error              - cb(error)
  */
 passport.use(
-  new Strategy(options, async (jwtPayload, cb) => {
-    try {
-      const user = jwtPayload;
-      if (!user) {
-        return cb(null, false, {
-          message: "Invalid auth token",
-        });
+  new Strategy(
+    options,
+    /**
+     * passport jwt strategy
+     * @param {*} jwtPayload - decoded JWT payload
+     * @param {*} cb - callback
+     * @returns callback with result or false
+     */
+    (jwtPayload, cb) => {
+      try {
+        const user = jwtPayload;
+        if (!user) {
+          return cb(null, false, {
+            message: "Invalid auth token",
+          });
+        }
+        return cb(null, user);
+      } catch (err) {
+        return cb(err);
       }
-      return cb(null, user);
-    } catch (err) {
-      return cb(err);
     }
-  })
+  )
 );
