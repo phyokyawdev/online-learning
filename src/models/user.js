@@ -1,11 +1,22 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const { hashPassword, checkPasswords } = require("@shared/services/password");
+const { UserCourse } = require("./user_course");
 
 const jwtPrivateKey = process.env.JWT_PRIVATE_KEY.replace(/\\n/gm, "\n");
 const jwtExpiresIn = process.env.JWT_EXPIRES_IN;
 const jwtAlgorithm = process.env.JWT_ALGORITHM;
 
+/**
+ * User
+ * ====
+ * username
+ * email
+ * password
+ * role
+ *
+ * user_courses
+ */
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -31,6 +42,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["basic", "admin", "student", "teacher"],
       default: "basic",
+    },
+    user_courses: {
+      type: [mongoose.Types.ObjectId],
+      ref: UserCourse,
     },
   },
   {
