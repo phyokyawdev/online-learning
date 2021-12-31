@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const { Course } = require("./course");
-const { User } = require("./user");
+const { Course } = require("@models/course");
+const { User } = require("@models/user");
 
 /**
  * UserCourse

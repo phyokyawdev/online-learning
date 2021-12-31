@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { Course } = require("./course");
+const { Course } = require("@models/course");
 
 /**
  * AssignmentQuestion

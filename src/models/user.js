@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const { hashPassword, checkPasswords } = require("@shared/services/password");
 const { generateAuthToken } = require("@shared/services/auth-token");
-const { UserCourse } = require("./user_course");
+const { UserCourse } = require("@models/user_course");
 
 /**
  * User
@@ -73,7 +73,11 @@ userSchema.methods.checkPassword = async function (suppliedPassword) {
 };
 
 userSchema.methods.generateAuthToken = async function () {
-  const payload = { id: this._id, role: this.role };
+  const payload = {
+    id: this._id,
+    role: this.role,
+    user_courses: this.user_courses,
+  };
   const token = await generateAuthToken(payload);
   return token;
 };
