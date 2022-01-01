@@ -3,8 +3,10 @@ const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 
 const app = require("@app");
+const { User } = require("@models/user");
 
 const SIGNUP_PATH = "/v1/auth/signup";
+const LOGIN_PATH = "/v1/auth/login";
 
 let mongo;
 
@@ -31,46 +33,79 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
+/** Supertest Response */
+
 /**
- * global test helpers
- * ===================
- * followings are the functions that
- * will be used frequently in tests
+ * login request
+ * @param {{username: string, password: string}} payload
+ * @returns {Promise} supertest response
  */
+async function login(payload) {
+  const res = await request(app).post(LOGIN_PATH).send(payload).expect(201);
+  return res;
+}
 
 /**
  * signup request
- * @returns {Promise} - supertest response
+ * @param {{username: string, email: string, password: string}} user
+ * @returns {Promise} supertest response
  */
-global.signup = async () => {
-  const username = "signup";
-  const email = "signup@test.com";
-  const password = "12345678";
-
-  const res = await request(app)
-    .post(SIGNUP_PATH)
-    .send({ username, email, password })
-    .expect(201);
-
+async function signup(user) {
+  const res = await request(app).post(SIGNUP_PATH).send(user).expect(201);
   return res;
-};
+}
 
 /**
- * new signup request
+ * user signup request
+ * @returns {Promise} supertest response
+ */
+async function userSignup() {
+  let user = {
+    username: "tester",
+    email: "test@test.com",
+    password: "12345678",
+  };
+  const res = await signup(user);
+  return res;
+}
+
+/**
+ * new user signup request
  * @returns {Promise} - supertest response
  */
-global.newSignup = async () => {
+async function newUserSignup() {
   let counter = 1;
-  const username = `signup${counter}`;
-  const email = `signup${counter}@test.com`;
-  const password = "12345678";
-
-  const res = await request(app)
-    .post(SIGNUP_PATH)
-    .send({ username, email, password })
-    .expect(201);
-
+  const user = {
+    username: `tester${counter}`,
+    email: `test${counter}@test.com`,
+    password: "12345678",
+  };
+  const res = await signup(user);
   counter++;
-
   return res;
-};
+}
+
+/** Auth Token */
+async function getBasicCookie() {
+  const token = (await userSignup()).get("Set-Cookie");
+  return token;
+}
+
+async function getAdminCookie() {
+  const { body } = await newUserSignup();
+
+  const user = await User.findById(body.id);
+  if (!user) throw new Error("user not exist");
+  user.updateToAdminRole();
+  user.save();
+
+  const res = await login({ username: body.username, password: "12345678" });
+
+  const token = res.get("Set-Cookie");
+  return token;
+}
+
+global.userSignup = userSignup;
+global.newUserSignup = newUserSignup;
+global.getBasicCookie = getBasicCookie;
+global.getAdminCookie = getAdminCookie;

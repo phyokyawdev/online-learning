@@ -1,11 +1,13 @@
 const request = require("supertest");
 const app = require("@app");
 
+const PATH = "/v1/auth/me";
+
 describe("/me", () => {
   it("should respond with detail about the current user", async () => {
-    const cookie = (await global.signup()).get("Set-Cookie");
+    const cookie = await global.getBasicCookie();
     const res = await request(app)
-      .get("/v1/auth/me")
+      .get(PATH)
       .set("Cookie", cookie)
       .send()
       .expect(200);
@@ -13,6 +15,6 @@ describe("/me", () => {
   });
 
   it("should respond 401 if not authenticated", async () => {
-    return request(app).get("/v1/auth/me").send().expect(401);
+    return request(app).get(PATH).send().expect(401);
   });
 });

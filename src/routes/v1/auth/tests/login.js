@@ -8,9 +8,9 @@ describe("/login", () => {
   let password;
 
   beforeEach(async () => {
-    await global.signup();
+    await global.userSignup();
 
-    email = "signup@test.com";
+    email = "test@test.com";
     password = "12345678";
   });
 
