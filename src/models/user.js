@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
-
+const { oneOf, body, query } = require("express-validator");
 const { hashPassword, checkPasswords } = require("@shared/services/password");
 const { generateAuthToken } = require("@shared/services/auth-token");
-const { UserCourse } = require("@models/user_course");
 
 /**
  * User
@@ -41,8 +40,8 @@ const userSchema = new mongoose.Schema(
       default: "basic",
     },
     user_courses: {
-      type: [mongoose.Types.ObjectId],
-      ref: UserCourse,
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "UserCourse",
     },
   },
   {
@@ -91,4 +90,26 @@ userSchema.statics.isExistingUser = async function (id) {
 
 const User = mongoose.model("User", userSchema);
 
-module.exports = { User };
+/** Request validation rules */
+const signupRules = [
+  body("username").isLength({ min: 5, max: 30 }),
+  body("email").isEmail(),
+  body("password").isLength({ min: 8, max: 1024 }),
+];
+
+const loginRules = [
+  oneOf([
+    body("username").isLength({ min: 5, max: 30 }),
+    body("email").isEmail(),
+  ]),
+  body("password").isLength({ min: 8, max: 1024 }),
+];
+
+const readRules = [
+  query("offset").customSanitizer(parseInt).default(0),
+  query("limit").customSanitizer(parseInt).default(10),
+];
+
+const updateRules = [body("role").trim().isIn(["basic", "teacher"])];
+
+module.exports = { User, signupRules, loginRules, readRules, updateRules };
