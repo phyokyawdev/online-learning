@@ -61,7 +61,7 @@ async function signup(user) {
  * new user signup request
  * @returns {Promise} - supertest response
  */
-async function uniqueUserSignup() {
+async function signupNewUser() {
   const id = nanoid();
   const user = {
     username: `tester-${id}`,
@@ -73,14 +73,14 @@ async function uniqueUserSignup() {
 }
 
 /** return cookie */
-async function getUniqueUserCookie() {
-  const cookie = (await uniqueUserSignup()).get("Set-Cookie");
+async function getNewUserCookie() {
+  const cookie = (await signupNewUser()).get("Set-Cookie");
   return cookie;
 }
 
-async function getUniqueAdminCookie() {
+async function getNewAdminCookie() {
   // signup
-  const { body } = await uniqueUserSignup();
+  const { body } = await signupNewUser();
   // update role to admin
   await User.findOneAndUpdate({ _id: body.id }, { role: "admin" });
   // login
@@ -90,6 +90,6 @@ async function getUniqueAdminCookie() {
   return cookie;
 }
 
-global.uniqueUserSignup = uniqueUserSignup;
-global.getUniqueUserCookie = getUniqueUserCookie;
-global.getUniqueAdminCookie = getUniqueAdminCookie;
+global.signupNewUser = signupNewUser;
+global.getNewUserCookie = getNewUserCookie;
+global.getNewAdminCookie = getNewAdminCookie;

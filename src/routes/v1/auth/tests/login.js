@@ -8,7 +8,7 @@ describe("/login", () => {
   let password;
 
   beforeEach(async () => {
-    const { body } = await global.uniqueUserSignup();
+    const { body } = await global.signupNewUser();
     email = body.email;
     password = "12345678";
   });

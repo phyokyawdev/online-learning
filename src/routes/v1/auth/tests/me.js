@@ -5,7 +5,7 @@ const PATH = "/v1/auth/me";
 
 describe("/me", () => {
   it("should respond with detail about the current user", async () => {
-    const cookie = await global.getUniqueUserCookie();
+    const cookie = await global.getNewUserCookie();
     const res = await request(app)
       .get(PATH)
       .set("Cookie", cookie)
