@@ -7,8 +7,8 @@ describe("PUT", () => {
   let adminCookie, user_id, payload;
 
   beforeEach(async () => {
-    adminCookie = await global.getAdminCookie();
-    user_id = (await global.userSignup()).body.id;
+    adminCookie = await global.getUniqueAdminCookie();
+    user_id = (await global.uniqueUserSignup()).body.id;
     payload = { role: "teacher" };
   });
 
@@ -26,7 +26,7 @@ describe("PUT", () => {
   });
 
   it("should return 403 if not admin", async () => {
-    adminCookie = await global.getBasicCookie();
+    adminCookie = await global.getUniqueUserCookie();
     const res = await exec();
     expect(res.status).toBe(403);
   });

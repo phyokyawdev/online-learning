@@ -1,5 +1,6 @@
 const request = require("supertest");
 const mongoose = require("mongoose");
+const { nanoid } = require("nanoid");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 
 const app = require("@app");
@@ -7,8 +8,9 @@ const { User } = require("@models/user");
 
 const SIGNUP_PATH = "/v1/auth/signup";
 const LOGIN_PATH = "/v1/auth/login";
-
 let mongo;
+
+jest.setTimeout(30000);
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create();
@@ -41,7 +43,7 @@ afterAll(async () => {
  * @returns {Promise} supertest response
  */
 async function login(payload) {
-  const res = await request(app).post(LOGIN_PATH).send(payload).expect(201);
+  const res = await request(app).post(LOGIN_PATH).send(payload).expect(200);
   return res;
 }
 
@@ -56,56 +58,38 @@ async function signup(user) {
 }
 
 /**
- * user signup request
- * @returns {Promise} supertest response
- */
-async function userSignup() {
-  let user = {
-    username: "tester",
-    email: "test@test.com",
-    password: "12345678",
-  };
-  const res = await signup(user);
-  return res;
-}
-
-/**
  * new user signup request
  * @returns {Promise} - supertest response
  */
-async function newUserSignup() {
-  let counter = 1;
+async function uniqueUserSignup() {
+  const id = nanoid();
   const user = {
-    username: `tester${counter}`,
-    email: `test${counter}@test.com`,
+    username: `tester-${id}`,
+    email: `test.${id}@test.com`,
     password: "12345678",
   };
   const res = await signup(user);
-  counter++;
   return res;
 }
 
-/** Auth Token */
-async function getBasicCookie() {
-  const token = (await userSignup()).get("Set-Cookie");
-  return token;
+/** return cookie */
+async function getUniqueUserCookie() {
+  const cookie = (await uniqueUserSignup()).get("Set-Cookie");
+  return cookie;
 }
 
-async function getAdminCookie() {
-  const { body } = await newUserSignup();
-
-  const user = await User.findById(body.id);
-  if (!user) throw new Error("user not exist");
-  user.updateToAdminRole();
-  user.save();
-
+async function getUniqueAdminCookie() {
+  // signup
+  const { body } = await uniqueUserSignup();
+  // update role to admin
+  await User.findOneAndUpdate({ _id: body.id }, { role: "admin" });
+  // login
   const res = await login({ username: body.username, password: "12345678" });
 
-  const token = res.get("Set-Cookie");
-  return token;
+  const cookie = res.get("Set-Cookie");
+  return cookie;
 }
 
-global.userSignup = userSignup;
-global.newUserSignup = newUserSignup;
-global.getBasicCookie = getBasicCookie;
-global.getAdminCookie = getAdminCookie;
+global.uniqueUserSignup = uniqueUserSignup;
+global.getUniqueUserCookie = getUniqueUserCookie;
+global.getUniqueAdminCookie = getUniqueAdminCookie;

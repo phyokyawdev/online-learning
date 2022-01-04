@@ -61,6 +61,7 @@
     "dotenv": "^10.0.0",
     "jest": "^27.3.1",
     "mongodb-memory-server": "^7.5.1",
+    "nanoid": "^3.1.30",
     "nodemon": "^2.0.14",
     "supertest": "^6.1.6"
   }

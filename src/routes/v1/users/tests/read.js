@@ -6,7 +6,7 @@ describe("GET", () => {
   let adminCookie, queryPayload, paramPayload;
 
   beforeEach(async () => {
-    adminCookie = await global.getAdminCookie();
+    adminCookie = await global.getUniqueAdminCookie();
     queryPayload = {};
     paramPayload = "";
   });
@@ -14,7 +14,7 @@ describe("GET", () => {
   const exec = () => {
     return request(app)
       .get(`${PATH}/${paramPayload}`)
-      .query()
+      .query(queryPayload)
       .set("Cookie", adminCookie)
       .send();
   };
@@ -26,7 +26,7 @@ describe("GET", () => {
   });
 
   it("should return 403 if not admin", async () => {
-    adminCookie = await global.getBasicCookie();
+    adminCookie = await global.getUniqueUserCookie();
     const res = await exec();
     expect(res.status).toBe(403);
   });
@@ -34,7 +34,7 @@ describe("GET", () => {
   it("should return 10 users without request query on success", async () => {
     // create 12 dummy users
     for (let i = 0; i < 12; i++) {
-      await global.newUserSignup();
+      await global.uniqueUserSignup();
     }
     const res = await exec();
     expect(res.status).toBe(200);
@@ -44,7 +44,7 @@ describe("GET", () => {
   it("should return defined users count with request query on success", async () => {
     // create 12 dummy users
     for (let i = 0; i < 12; i++) {
-      await global.newUserSignup();
+      await global.uniqueUserSignup();
     }
     queryPayload = { offset: 0, limit: 11 };
     const res = await exec();
@@ -59,7 +59,7 @@ describe("GET", () => {
   });
 
   it("should return specific user upon request with valid param payload", async () => {
-    const { body } = await global.userSignup();
+    const { body } = await global.uniqueUserSignup();
     paramPayload = body.id;
 
     const res = await exec();
