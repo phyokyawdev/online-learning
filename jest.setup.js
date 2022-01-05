@@ -1,13 +1,16 @@
 const request = require("supertest");
 const mongoose = require("mongoose");
-const { nanoid } = require("nanoid");
 const { MongoMemoryServer } = require("mongodb-memory-server");
+const { nanoid, customAlphabet } = require("nanoid/non-secure");
+const { lowercase } = require("nanoid-dictionary");
 
 const app = require("@app");
 const { User } = require("@models/user");
+const lowerString = customAlphabet(lowercase, 10);
 
 const SIGNUP_PATH = "/v1/auth/signup";
 const LOGIN_PATH = "/v1/auth/login";
+const TAGS_PATH = "/v1/tags";
 let mongo;
 
 jest.setTimeout(30000);
@@ -35,7 +38,11 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-/** Supertest Response */
+/**
+ * Local Test Helpers
+ * ==================
+ * The following functions are used locally in this file.
+ */
 
 /**
  * login request
@@ -58,9 +65,36 @@ async function signup(user) {
 }
 
 /**
- * new user signup request
- * @returns {Promise} - supertest response
+ * update role of existing user
+ * @param {{ id: string, username: string }} payload - existing user
+ * @param {string} role - role to update
+ * @returns {Promise} supertest response
  */
+async function updateUserRole(payload, role) {
+  await User.findByIdAndUpdate(payload.id, { role });
+  const res = await login({ username: payload.username, password: "12345678" });
+  return res;
+}
+
+/**
+ * Global Test Helpers
+ * ===================
+ * The following functions will be added to jest global namespace.
+ */
+
+/** Functions that return supertest response */
+
+async function newTag() {
+  const teacherCookie = await getNewTeacherCookie();
+  const name = lowerString();
+  const res = await request(app)
+    .post(TAGS_PATH)
+    .set("Cookie", teacherCookie)
+    .send({ name })
+    .expect(201);
+  return res;
+}
+
 async function signupNewUser() {
   const id = nanoid();
   const user = {
@@ -72,20 +106,23 @@ async function signupNewUser() {
   return res;
 }
 
-/** return cookie */
+/** Functions that return cookie */
+
 async function getNewUserCookie() {
   const cookie = (await signupNewUser()).get("Set-Cookie");
   return cookie;
 }
 
 async function getNewAdminCookie() {
-  // signup
   const { body } = await signupNewUser();
-  // update role to admin
-  await User.findOneAndUpdate({ _id: body.id }, { role: "admin" });
-  // login
-  const res = await login({ username: body.username, password: "12345678" });
+  const res = await updateUserRole(body, "admin");
+  const cookie = res.get("Set-Cookie");
+  return cookie;
+}
 
+async function getNewTeacherCookie() {
+  const { body } = await signupNewUser();
+  const res = await updateUserRole(body, "teacher");
   const cookie = res.get("Set-Cookie");
   return cookie;
 }
@@ -93,3 +130,5 @@ async function getNewAdminCookie() {
 global.signupNewUser = signupNewUser;
 global.getNewUserCookie = getNewUserCookie;
 global.getNewAdminCookie = getNewAdminCookie;
+global.getNewTeacherCookie = getNewTeacherCookie;
+global.newTag = newTag;
