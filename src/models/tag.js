@@ -5,6 +5,8 @@ const { body, query } = require("express-validator");
  * Tag
  * ===
  * name
+ *
+ * courses
  */
 const tagSchema = new mongoose.Schema(
   {
@@ -13,6 +15,10 @@ const tagSchema = new mongoose.Schema(
       required: true,
       maxlength: 35,
       unique: true,
+    },
+    courses: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Course",
     },
   },
   {
