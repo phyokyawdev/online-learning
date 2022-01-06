@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { validateRequest } = require("@shared/middlewares");
+const { validateRequest, validatePath } = require("@shared/middlewares");
 const { readRules, Tag } = require("@models/tag");
 const { isValidObjectId } = require("@shared/services/object-id");
 const { NotFoundError } = require("@shared/errors");
@@ -23,11 +23,8 @@ router.get("/", validateRequest(readRules), async (req, res) => {
   res.send(tags);
 });
 
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-  if (!isValidObjectId(id)) throw new NotFoundError("Invalid tag id");
-
-  const tag = await Tag.findById(id);
+router.get("/:id", validatePath("id", isValidObjectId), async (req, res) => {
+  const tag = await Tag.findById(req.params.id);
   if (!tag) throw new NotFoundError();
 
   res.send(tag);

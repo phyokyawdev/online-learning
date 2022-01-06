@@ -2,18 +2,21 @@ const express = require("express");
 const router = express.Router();
 
 const { isValidObjectId } = require("@shared/services/object-id");
-const { auth, allowAdmin } = require("@shared/middlewares");
+const { auth, allowAdmin, validatePath } = require("@shared/middlewares");
 const { NotFoundError } = require("@shared/errors");
 const { Tag } = require("@models/tag");
 
-router.delete("/:id", auth, allowAdmin, async (req, res) => {
-  const { id } = req.params;
-  if (!isValidObjectId(id)) throw new NotFoundError("Invalid tag id.");
+router.delete(
+  "/:id",
+  auth,
+  allowAdmin,
+  validatePath("id", isValidObjectId),
+  async (req, res) => {
+    const tag = await Tag.findById(req.params.id);
+    if (!tag) throw new NotFoundError();
 
-  const tag = await Tag.findById(id);
-  if (!tag) throw new NotFoundError();
-
-  res.status(204).send();
-});
+    res.status(204).send();
+  }
+);
 
 module.exports = router;
