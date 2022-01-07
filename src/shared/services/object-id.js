@@ -5,7 +5,12 @@ function isValidObjectId(id) {
 }
 
 function createNewObjectId() {
-  return new mongoose.Schema.Types.ObjectId();
+  return new mongoose.Types.ObjectId();
 }
 
-module.exports = { isValidObjectId, createNewObjectId };
+function objectIdValidator(value) {
+  if (!isValidObjectId(value)) throw new Error("Invalid object id.");
+  return true;
+}
+
+module.exports = { isValidObjectId, createNewObjectId, objectIdValidator };
