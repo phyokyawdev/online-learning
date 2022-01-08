@@ -19,6 +19,7 @@ const tagSchema = new mongoose.Schema(
     courses: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Course",
+      default: [],
     },
   },
   {
@@ -38,14 +39,25 @@ tagSchema.statics.isExistingTagName = async function (name) {
   return true;
 };
 
+tagSchema.statics.addCourseToTags = async function (course, tags) {
+  await this.updateMany({ _id: { $in: tags } }, { $push: { courses: course } });
+};
+
+tagSchema.statics.removeCourseFromTags = async function (course, tags) {
+  await this.updateMany(
+    { _id: { $in: tags } },
+    { $pullAll: { courses: [course] } }
+  );
+};
+
 const Tag = mongoose.model("Tag", tagSchema);
 
 /** Validation rules */
 const createRules = [
   body("name")
+    .isString()
     .trim()
-    .not()
-    .isEmpty()
+    .notEmpty()
     .bail()
     .isAlpha()
     .toLowerCase()
@@ -55,6 +67,14 @@ const createRules = [
 const readRules = [
   query("offset").customSanitizer(parseInt).default(0),
   query("limit").customSanitizer(parseInt).default(20),
+  query("search").optional({ checkFalsy: true }).isString().toLowerCase(),
 ];
 
-module.exports = { Tag, createRules, readRules };
+/** Custom validators */
+const tagValidator = async (id) => {
+  const tag = await Tag.findById(id);
+  if (!tag) throw new Error("Tag not exist.");
+  return true;
+};
+
+module.exports = { Tag, createRules, readRules, tagValidator };

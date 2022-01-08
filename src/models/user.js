@@ -112,4 +112,19 @@ const readRules = [
 
 const updateRules = [body("role").trim().isIn(["basic", "teacher"])];
 
-module.exports = { User, signupRules, loginRules, readRules, updateRules };
+/** Custom validators */
+const teacherValidator = async (id) => {
+  const user = await User.findById(id);
+  if (!user) throw new Error("Teacher not exist.");
+  if (user.role !== "teacher") throw new Error("Teacher is invalid");
+  return true;
+};
+
+module.exports = {
+  User,
+  signupRules,
+  loginRules,
+  readRules,
+  updateRules,
+  teacherValidator,
+};
