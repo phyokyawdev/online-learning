@@ -11,6 +11,7 @@ const lowerString = customAlphabet(lowercase, 10);
 const SIGNUP_PATH = "/v1/auth/signup";
 const LOGIN_PATH = "/v1/auth/login";
 const TAGS_PATH = "/v1/tags";
+const COURSES_PATH = "/v1/courses";
 let mongo;
 
 jest.setTimeout(30000);
@@ -82,18 +83,12 @@ async function updateUserRole(payload, role) {
  * The following functions will be added to jest global namespace.
  */
 
-/** Functions that return supertest response */
-
-async function newTag() {
-  const teacherCookie = await getNewTeacherCookie();
-  const name = lowerString();
-  const res = await request(app)
-    .post(TAGS_PATH)
-    .set("Cookie", teacherCookie)
-    .send({ name })
-    .expect(201);
-  return res;
-}
+/**
+ * Functions that will return Supertest Response
+ * =============================================
+ * The follwings are functions that will create specific
+ * entities and return supertest response of them.
+ */
 
 async function signupNewUser() {
   const id = nanoid();
@@ -106,7 +101,41 @@ async function signupNewUser() {
   return res;
 }
 
-/** Functions that return cookie */
+async function newTag() {
+  const teacherCookie = await getNewTeacherCookie();
+  const name = lowerString();
+  const res = await request(app)
+    .post(TAGS_PATH)
+    .set("Cookie", teacherCookie)
+    .send({ name })
+    .expect(201);
+  res.headers["set-cookie"] = teacherCookie;
+  return res;
+}
+
+async function newCourse() {
+  const teacherCookie = await getNewTeacherCookie();
+  const { body } = await newTag();
+  const course = {
+    title: "Node js basic",
+    content: "This course include various information about Node js",
+    tags: [body.id],
+  };
+  const res = await request(app)
+    .post(COURSES_PATH)
+    .set("Cookie", teacherCookie)
+    .send(course)
+    .expect(201);
+  res.headers["set-cookie"] = teacherCookie;
+  return res;
+}
+
+/**
+ * Functions that will return cookie
+ * =================================
+ * The followings are functions that will
+ * return cookies for specific user roles.
+ */
 
 async function getNewUserCookie() {
   const cookie = (await signupNewUser()).get("Set-Cookie");
@@ -132,3 +161,4 @@ global.getNewUserCookie = getNewUserCookie;
 global.getNewAdminCookie = getNewAdminCookie;
 global.getNewTeacherCookie = getNewTeacherCookie;
 global.newTag = newTag;
+global.newCourse = newCourse;
