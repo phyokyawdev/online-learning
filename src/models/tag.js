@@ -33,6 +33,11 @@ const tagSchema = new mongoose.Schema(
   }
 );
 
+tagSchema.pre("remove", async function (next) {
+  await mongoose.model("Course").removeTagFromCourses(this, this.courses);
+  next();
+});
+
 tagSchema.statics.isExistingTagName = async function (name) {
   const tag = await this.findOne({ name });
   if (!tag) return false;

@@ -12,8 +12,10 @@ router.delete(
   allowAdmin,
   validatePath("id", isValidObjectId),
   async (req, res) => {
-    const tag = await Tag.findByIdAndDelete(req.params.id);
+    const tag = await Tag.findById(req.params.id);
     if (!tag) throw new NotFoundError();
+
+    await tag.remove();
 
     res.status(204).send();
   }

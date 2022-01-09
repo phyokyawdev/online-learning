@@ -68,11 +68,18 @@ courseSchema.pre("remove", async function (next) {
 });
 
 courseSchema.post("save", async function (doc) {
-  const course = await Tag.populate(doc, { path: "tags" });
+  await Tag.populate(doc, { path: "tags" });
 });
 
 courseSchema.methods.isOwner = function (id) {
   return this.teacher.toString() === id;
+};
+
+courseSchema.statics.removeTagFromCourses = async function (tag, courses) {
+  await this.updateMany(
+    { _id: { $in: courses } },
+    { $pullAll: { tags: [tag] } }
+  );
 };
 
 const Course = mongoose.model("Course", courseSchema);
