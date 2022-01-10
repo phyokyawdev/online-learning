@@ -130,6 +130,26 @@ async function newCourse() {
   return res;
 }
 
+async function newLecture(courseRes) {
+  const courseOwnerCookie = courseRes.get("Set-Cookie");
+  const courseId = courseRes.body.id;
+  const index = Math.floor(Math.random() * 100);
+  const lecture = {
+    index,
+    title: "setup node js",
+    url: `https://cloudstorage.com/resource/${courseId}/${index}`,
+  };
+
+  const res = await request(app)
+    .post(`${COURSES_PATH}/${courseId}/lectures`)
+    .set("Cookie", courseOwnerCookie)
+    .send(lecture)
+    .expect(201);
+
+  res.headers["set-cookie"] = courseOwnerCookie;
+  return res;
+}
+
 /**
  * Functions that will return cookie
  * =================================
@@ -162,3 +182,4 @@ global.getNewAdminCookie = getNewAdminCookie;
 global.getNewTeacherCookie = getNewTeacherCookie;
 global.newTag = newTag;
 global.newCourse = newCourse;
+global.newLecture = newLecture;
