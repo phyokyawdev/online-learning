@@ -10,8 +10,6 @@ const { generateAuthToken } = require("@shared/services/auth-token");
  * email
  * password
  * role
- *
- * user_courses
  */
 const userSchema = new mongoose.Schema(
   {
@@ -38,10 +36,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["basic", "admin", "teacher"],
       default: "basic",
-    },
-    user_courses: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "UserCourse",
     },
   },
   {
@@ -75,7 +69,6 @@ userSchema.methods.generateAuthToken = async function () {
   const payload = {
     id: this._id,
     role: this.role,
-    user_courses: this.user_courses,
   };
   const token = await generateAuthToken(payload);
   return token;
