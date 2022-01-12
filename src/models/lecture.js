@@ -47,6 +47,28 @@ const lectureSchema = new mongoose.Schema(
   }
 );
 
+lectureSchema.statics.create = async function (body, course, teacher) {
+  const { index, title, url } = body;
+  let lecture = new this({ index, title, url, course, teacher });
+  lecture = await lecture.save();
+  return lecture;
+};
+
+lectureSchema.statics.findByIdString = async function (id) {
+  if (!mongoose.isValidObjectId(id)) return false;
+  const lecture = await this.findById(id);
+  if (!lecture) return false;
+  return lecture;
+};
+
+lectureSchema.methods.updateBody = async function (body) {
+  const { index, title, url } = body;
+  this.index = index;
+  this.title = title;
+  this.url = url;
+  await this.save();
+};
+
 const Lecture = mongoose.model("Lecture", lectureSchema);
 
 /** Request Validation Rules */
