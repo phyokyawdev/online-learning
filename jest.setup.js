@@ -2,11 +2,12 @@ const request = require("supertest");
 const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const { nanoid, customAlphabet } = require("nanoid/non-secure");
-const { lowercase } = require("nanoid-dictionary");
+const { lowercase, uppercase } = require("nanoid-dictionary");
 
 const app = require("@app");
 const { User } = require("@models/user");
 const lowerString = customAlphabet(lowercase, 10);
+const upperString = customAlphabet(uppercase, 10);
 
 const SIGNUP_PATH = "/v1/auth/signup";
 const LOGIN_PATH = "/v1/auth/login";
@@ -14,7 +15,7 @@ const TAGS_PATH = "/v1/tags";
 const COURSES_PATH = "/v1/courses";
 let mongo;
 
-jest.setTimeout(30000);
+jest.setTimeout(50000);
 
 beforeAll(async () => {
   mongo = await MongoMemoryServer.create();
@@ -150,6 +151,24 @@ async function newLecture(courseRes) {
   return res;
 }
 
+async function newStudent(courseRes) {
+  const courseOwnerCookie = courseRes.get("Set-Cookie");
+  const courseId = courseRes.body.id;
+  const student = {
+    token: upperString(),
+    lecture_access_deadline: "2022-02-10",
+  };
+
+  const res = await request(app)
+    .post(`${COURSES_PATH}/${courseId}/students`)
+    .set("Cookie", courseOwnerCookie)
+    .send(student)
+    .expect(201);
+
+  res.headers["set-cookie"] = courseOwnerCookie;
+  return res;
+}
+
 /**
  * Functions that will return cookie
  * =================================
@@ -183,3 +202,4 @@ global.getNewTeacherCookie = getNewTeacherCookie;
 global.newTag = newTag;
 global.newCourse = newCourse;
 global.newLecture = newLecture;
+global.newStudent = newStudent;
