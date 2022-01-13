@@ -43,6 +43,7 @@ const courseSchema = new mongoose.Schema(
       transform(_, ret) {
         ret.id = ret._id;
         delete ret._id;
+        delete ret.__v;
         return ret;
       },
     },
@@ -71,10 +72,7 @@ courseSchema.post("save", async function (doc) {
   await Tag.populate(doc, { path: "tags" });
 });
 
-courseSchema.methods.isOwner = function (id) {
-  return this.teacher.toString() === id;
-};
-
+/** Static Methods */
 courseSchema.statics.removeTagFromCourses = async function (tag, courses) {
   await this.updateMany(
     { _id: { $in: courses } },
@@ -82,19 +80,53 @@ courseSchema.statics.removeTagFromCourses = async function (tag, courses) {
   );
 };
 
+courseSchema.statics.create = async function (body, teacher) {
+  const { title, content, tags } = body;
+  const course = new this({ title, content, tags, teacher });
+  await course.save();
+  return course;
+};
+
+courseSchema.statics.findByQuery = async function (query) {
+  const { offset, limit, tags, teacher, search } = query;
+  let findParam = {};
+  if (tags) findParam.tags = { $in: tags };
+  if (teacher) findParam.teacher = teacher;
+  if (search) findParam.title = { $regex: ".*" + search + ".*" };
+
+  const courses = await this.find(findParam)
+    .skip(offset)
+    .limit(limit)
+    .populate("tags");
+  return courses;
+};
+
+courseSchema.statics.findByIdString = async function (id) {
+  if (!mongoose.isValidObjectId(id)) return false;
+  const course = await this.findById(id).populate("tags");
+  return course;
+};
+
+/** Instance Methods */
+courseSchema.methods.updateBody = async function (body) {
+  const { title, content, tags } = body;
+  this.title = title;
+  this.content = content;
+  this.tags = tags;
+  const course = await this.save();
+  return course;
+};
+
+courseSchema.methods.isOwner = function (id) {
+  return this.teacher.toString() === id;
+};
+
 const Course = mongoose.model("Course", courseSchema);
 
 /** Custom Helper Functions */
-
 const removeDuplicatesInArray = (values) => [...new Set(values)];
 
-const convertStringToArray = (values) => {
-  if (Array.isArray(values)) return values;
-  return [values];
-};
-
 /** Validation Rules */
-
 const createRules = [
   body("title").trim().not().isEmpty(),
   body("content").trim().not().isEmpty(),
@@ -105,10 +137,6 @@ const createRules = [
   body("tags.*").custom(objectIdValidator).bail().custom(tagValidator),
 ];
 
-/**
- * express query string parser has problem,
- * one element array is being parsed as string
- * */
 const readRules = [
   query("offset").customSanitizer(parseInt).default(0),
   query("limit").customSanitizer(parseInt).default(10),
@@ -119,7 +147,8 @@ const readRules = [
     .custom(teacherValidator),
   query("tags")
     .optional()
-    .customSanitizer(convertStringToArray)
+    .isArray({ min: 1 })
+    .bail()
     .customSanitizer(removeDuplicatesInArray),
   query("tags.*")
     .optional()

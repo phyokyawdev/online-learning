@@ -1,4 +1,4 @@
-describe("/v1/course", () => {
+describe("/v1/courses", () => {
   require("./create");
   require("./read");
   require("./update");
