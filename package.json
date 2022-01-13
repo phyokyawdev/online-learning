@@ -41,6 +41,7 @@
   "dependencies": {
     "compression": "^1.7.4",
     "cookie-session": "^1.4.0",
+    "date-fns": "^2.28.0",
     "express": "^4.17.1",
     "express-actuator": "^1.8.0",
     "express-async-errors": "^3.1.1",

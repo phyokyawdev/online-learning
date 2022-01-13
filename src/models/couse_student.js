@@ -1,3 +1,4 @@
+const { isPast } = require("date-fns");
 const { body, query } = require("express-validator");
 const mongoose = require("mongoose");
 
@@ -91,6 +92,16 @@ courseStudentSchema.statics.enrollUser = async function (
   student.user = user_id;
   student = await student.save();
   return student;
+};
+
+courseStudentSchema.statics.isLectureAccessible = async function (
+  user,
+  course
+) {
+  const student = await this.findOne({ user, course });
+  if (!student) return false;
+  if (isPast(student.lecture_access_deadline)) return false;
+  return true;
 };
 
 courseStudentSchema.methods.updateDefinedFields = async function (body) {
