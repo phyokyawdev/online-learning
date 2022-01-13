@@ -1,9 +1,14 @@
 const express = require("express");
 const router = express.Router();
 
-const { allowCourseOwner, validateRequest } = require("@shared/middlewares");
-const { createRules, Lecture } = require("@models/lecture");
-const { NotFoundError } = require("@shared/errors");
+const {
+  allowCourseOwner,
+  validateRequest,
+  oneOf,
+  allowLectureAccessibleStudent,
+} = require("@shared/middlewares");
+const { Lecture, createRules, readRules } = require("@models/lecture");
+const { NotFoundError, ForbiddenError } = require("@shared/errors");
 
 /**
  * req.lecture will be available in
@@ -24,6 +29,32 @@ router.post(
     const { body, currentCourse, user } = req;
     const lecture = await Lecture.create(body, currentCourse.id, user.id);
     res.status(201).send(lecture);
+  }
+);
+
+router.get(
+  "/",
+  oneOf(
+    [allowCourseOwner, allowLectureAccessibleStudent],
+    new ForbiddenError("Only course owner or accessible student is allowed")
+  ),
+  validateRequest(readRules),
+  async (req, res) => {
+    const { query, currentCourse } = req;
+    const lectures = await Lecture.findByQuery(query, currentCourse.id);
+    res.send(lectures);
+  }
+);
+
+router.get(
+  "/:id",
+  oneOf(
+    [allowCourseOwner, allowLectureAccessibleStudent],
+    new ForbiddenError("Only course owner or accessible student is allowed")
+  ),
+  async (req, res) => {
+    const { lecture } = req;
+    res.send(lecture);
   }
 );
 

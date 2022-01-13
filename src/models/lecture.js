@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { body } = require("express-validator");
+const { body, query } = require("express-validator");
 
 /**
  * Lecture
@@ -61,6 +61,12 @@ lectureSchema.statics.findByIdString = async function (id) {
   return lecture;
 };
 
+lectureSchema.statics.findByQuery = async function (query, course) {
+  const { offset, limit } = query;
+  const lectures = await this.find({ course }).skip(offset).limit(limit);
+  return lectures;
+};
+
 lectureSchema.methods.updateBody = async function (body) {
   const { index, title, url } = body;
   this.index = index;
@@ -78,4 +84,9 @@ const createRules = [
   body("url").isURL(),
 ];
 
-module.exports = { Lecture, createRules };
+const readRules = [
+  query("offset").customSanitizer(parseInt).default(0),
+  query("limit").customSanitizer(parseInt).default(10),
+];
+
+module.exports = { Lecture, createRules, readRules };
