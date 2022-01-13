@@ -13,7 +13,7 @@ const mongoose = require("mongoose");
  * user*
  * course
  */
-const courseStudentSchema = new mongoose.Schema(
+const studentSchema = new mongoose.Schema(
   {
     token: {
       type: String,
@@ -46,22 +46,30 @@ const courseStudentSchema = new mongoose.Schema(
       transform(_, ret) {
         ret.id = ret._id;
         delete ret._id;
+        delete ret.__v;
         return ret;
       },
     },
   }
 );
 
-courseStudentSchema.index({ token: 1, course: 1 }, { unique: true });
+studentSchema.index({ token: 1, course: 1 }, { unique: true });
 
-courseStudentSchema.statics.findByIdString = async function (id) {
+studentSchema.statics.findByIdString = async function (id) {
   if (!mongoose.isValidObjectId(id)) return false;
-  return this.findById(id);
+  const student = await this.findById(id);
+  return student;
 };
 
-courseStudentSchema.statics.findByQuery = async function (query, course) {
-  const { offset, limit, enrolled } = query;
+studentSchema.statics.create = async function (body, course) {
+  const { token, lecture_access_deadline } = body;
+  let student = new this({ token, lecture_access_deadline, course });
+  student = await student.save();
+  return student;
+};
 
+studentSchema.statics.findByQuery = async function (query, course) {
+  const { offset, limit, enrolled } = query;
   let findParams = {};
   findParams.course = course;
   if (enrolled !== undefined)
@@ -71,55 +79,42 @@ courseStudentSchema.statics.findByQuery = async function (query, course) {
   return students;
 };
 
-courseStudentSchema.statics.create = async function (body, course) {
-  const { token, lecture_access_deadline } = body;
-  let student = new this({ token, lecture_access_deadline, course });
-  student = await student.save();
-  return student;
-};
-
-courseStudentSchema.statics.enrollUser = async function (
-  user_id,
-  body,
-  course
-) {
+studentSchema.statics.findByToken = async function (body, course) {
   const { token } = body;
-  let student = await this.findOne({ course: course, token: token });
-  if (!student) return false;
-
-  if (student.user) return false;
-
-  student.user = user_id;
-  student = await student.save();
+  const student = await this.findOne({ token, course });
   return student;
 };
 
-courseStudentSchema.statics.isLectureAccessible = async function (
-  user,
-  course
-) {
+studentSchema.statics.isLectureAccessible = async function (user, course) {
   const student = await this.findOne({ user, course });
   if (!student) return false;
   if (isPast(student.lecture_access_deadline)) return false;
   return true;
 };
 
-courseStudentSchema.methods.updateDefinedFields = async function (body) {
+studentSchema.methods.updateBody = async function (body) {
   const { lecture_access_deadline, completed, credit } = body;
-
   if (lecture_access_deadline)
     this.lecture_access_deadline = lecture_access_deadline;
   if (completed) this.completed = completed;
   if (credit) this.credit = credit;
-
   await this.save();
 };
 
-courseStudentSchema.methods.isStudentHimself = function (id) {
+studentSchema.methods.isTokenUsed = function () {
+  return this.user;
+};
+
+studentSchema.methods.enroll = async function (user) {
+  this.user = user;
+  await this.save();
+};
+
+studentSchema.methods.isStudentHimself = function (id) {
   return this.user && this.user.toString() === id;
 };
 
-const CourseStudent = mongoose.model("CourseStudent", courseStudentSchema);
+const CourseStudent = mongoose.model("CourseStudent", studentSchema);
 
 /** Request Validation Rules */
 const createRules = [

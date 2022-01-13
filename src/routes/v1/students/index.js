@@ -21,28 +21,16 @@ const {
 } = require("@models/couse_student");
 
 /**
- * Course Student Router
- * =====================
- * req.user and req.currentCourse will be available in
- * all route handlers.
- */
-
-/**
- * param handler for id
- * - search student
- * - add student to req
- * router handlers with id param in this router can use
- * req.student.
+ * req.student will be available in
+ * all route handlers with id param.
  */
 router.param("id", async (req, _res, next, id) => {
   const student = await CourseStudent.findByIdString(id);
   if (!student) throw new NotFoundError("Student not exist.");
-
   req.student = student;
   next();
 });
 
-/** create student */
 router.post(
   "/",
   allowCourseOwner,
@@ -54,7 +42,6 @@ router.post(
   }
 );
 
-/** read students */
 router.get(
   "/",
   allowCourseOwner,
@@ -66,7 +53,6 @@ router.get(
   }
 );
 
-/** read student */
 router.get(
   "/:id",
   oneOf(
@@ -74,43 +60,38 @@ router.get(
     new ForbiddenError("Only course owner or student himself is allowed.")
   ),
   async (req, res) => {
-    // either student or course owner
-    res.send(req.student);
+    const { student } = req;
+    res.send(student);
   }
 );
 
-/** update student (update by course owner) */
+/** update student by course owner */
 router.patch(
   "/:id",
   allowCourseOwner,
   validateRequest(updateRules),
   async (req, res) => {
     const { student, body } = req;
-    await student.updateDefinedFields(body);
+    await student.updateBody(body);
     res.send(student);
   }
 );
 
-/** delete student */
 router.delete("/:id", allowCourseOwner, async (req, res) => {
-  await req.student.remove();
+  const { student } = req;
+  await student.remove();
   res.status(204).send();
 });
 
-/**
- * User Enrollment Route
- * patch - /courses/:courseId/students
- * + body.token
- */
+/** enroll to course students by user */
 router.patch("/", validateRequest(enrollRules), async (req, res) => {
   const { user, body, currentCourse } = req;
-  const student = await CourseStudent.enrollUser(
-    user.id,
-    body,
-    currentCourse.id
-  );
-  if (!student) throw new ConflictError("Invalid or used token.");
-  res.send(student);
+  const position = await CourseStudent.findByToken(body, currentCourse.id);
+  if (!position) throw new NotFoundError("Invalid token.");
+
+  if (position.isTokenUsed()) throw new ConflictError("Token already used.");
+  await position.enroll(user.id);
+  res.send(position);
 });
 
 module.exports = router;
