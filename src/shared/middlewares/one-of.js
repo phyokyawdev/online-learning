@@ -11,15 +11,16 @@
  * const AsyncFunction = (async () => {}).constructor;
  * if(f instanceof AsyncFunction === true)
  */
-const oneOf = (middlewares, err) => (req, res, next) => {
-  const errors = middlewares.reduce((acc, elt) => {
+const oneOf = (middlewares, err) => async (req, res, next) => {
+  const errors = await middlewares.reduce(async (acc, elt) => {
+    let accumulator = await acc;
     try {
-      elt(req, res, () => {});
-      return acc;
+      await elt(req, res, () => {});
     } catch (error) {
-      return [...acc, error];
+      accumulator.push(error);
     }
-  }, []);
+    return accumulator;
+  }, Promise.resolve([]));
 
   if (errors.length < middlewares.length) next();
   else next(err);
