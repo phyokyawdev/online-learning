@@ -33,7 +33,7 @@ describe("POST", () => {
   });
 
   it("should return 409 if tag already exist", async () => {
-    await exec();
+    await exec().expect(201);
     const res = await exec();
     expect(res.status).toBe(409);
   });
