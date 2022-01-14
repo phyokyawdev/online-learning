@@ -74,11 +74,31 @@ userSchema.methods.generateAuthToken = async function () {
   return token;
 };
 
+userSchema.methods.updateBody = async function (body) {
+  const { role } = body;
+  this.role = role;
+  await this.save();
+  return this;
+};
+
 /** Static methods */
-userSchema.statics.isExistingUser = async function (id) {
+userSchema.statics.create = async function (body) {
+  const { username, email, password } = body;
+  const user = new this({ username, email, password });
+  await user.save();
+  return user;
+};
+
+userSchema.statics.findByIdString = async function (id) {
+  if (!mongoose.isValidObjectId(id)) return false;
   const user = await this.findById(id);
-  if (!user) return false;
-  return true;
+  return user;
+};
+
+userSchema.statics.findByQuery = async function (query) {
+  const { offset, limit } = query;
+  const users = await this.find({}).skip(offset).limit(limit);
+  return users;
 };
 
 const User = mongoose.model("User", userSchema);

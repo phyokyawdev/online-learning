@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const app = require("@app");
 const PATH = "/v1/users";
 
-describe("PUT", () => {
+describe("PATCH", () => {
   let adminCookie, user_id, payload;
 
   beforeEach(async () => {
@@ -14,7 +14,7 @@ describe("PUT", () => {
 
   const exec = () => {
     return request(app)
-      .put(`${PATH}/${user_id}`)
+      .patch(`${PATH}/${user_id}`)
       .set("Cookie", adminCookie)
       .send(payload);
   };

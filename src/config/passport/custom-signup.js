@@ -1,7 +1,7 @@
 const passport = require("passport");
 const { Strategy } = require("passport-custom");
 
-const { User } = require("../../models/user");
+const { User } = require("@models/user");
 
 /**
  * signup with username, email, password
@@ -13,7 +13,7 @@ passport.use(
   "signup",
   new Strategy(async (req, cb) => {
     try {
-      const { username, email, password } = req.body;
+      const { username, email } = req.body;
 
       const existingEmail = await User.findOne({ email });
       if (existingEmail) {
@@ -30,8 +30,7 @@ passport.use(
       }
 
       // create user
-      const user = new User({ username, email, password });
-      await user.save();
+      const user = await User.create(req.body);
 
       return cb(null, user);
     } catch (err) {
