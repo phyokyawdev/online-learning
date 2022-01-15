@@ -8,7 +8,8 @@ describe("/v1/courses/{courseId}/lectures", () => {
     let courseId, userCookie;
 
     beforeEach(async () => {
-      courseId = await global.newCourse();
+      const course_res = await global.newCourse();
+      courseId = course_res.body.id;
       userCookie = await global.getNewUserCookie();
     });
 
