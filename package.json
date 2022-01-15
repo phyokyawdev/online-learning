@@ -58,6 +58,7 @@
     "winston-loggly-bulk": "^3.2.1"
   },
   "devDependencies": {
+    "@types/jest": "^27.4.0",
     "debug": "^4.3.2",
     "dotenv": "^10.0.0",
     "jest": "^27.3.1",

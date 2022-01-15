@@ -169,6 +169,26 @@ async function newStudent(courseRes) {
   return res;
 }
 
+async function newQuestion(courseRes) {
+  const courseOwnerCookie = courseRes.get("Set-Cookie");
+  const courseId = courseRes.body.id;
+  const index = Math.floor(Math.random() * 100);
+  const question = {
+    index,
+    title: `Assignment number ${index}`,
+    content: `This is assignment question no ${index} for ${courseId}`,
+  };
+
+  const res = await request(app)
+    .post(`${COURSES_PATH}/${courseId}/assignment_questions`)
+    .set("Cookie", courseOwnerCookie)
+    .send(question)
+    .expect(201);
+
+  res.headers["set-cookie"] = courseOwnerCookie;
+  return res;
+}
+
 /**
  * Functions that will return cookie
  * =================================
@@ -203,3 +223,4 @@ global.newTag = newTag;
 global.newCourse = newCourse;
 global.newLecture = newLecture;
 global.newStudent = newStudent;
+global.newQuestion = newQuestion;
