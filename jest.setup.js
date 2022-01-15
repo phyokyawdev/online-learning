@@ -190,7 +190,7 @@ async function newQuestion(courseRes) {
 }
 
 async function enrollNewUser(studentRes) {
-  const courseId = studentRes.body.course.id;
+  const courseId = studentRes.body.course;
   const userCookie = await getNewUserCookie();
 
   const res = await request(app)

@@ -50,7 +50,7 @@ router.post(
   validateRequest(createRules),
   async (req, res) => {
     const { body, currentCourse } = req;
-    const student = await CourseStudent.create(body, currentCourse);
+    const student = await CourseStudent.create(body, currentCourse.id);
     res.status(201).send(student);
   }
 );
@@ -61,7 +61,7 @@ router.get(
   validateRequest(readRules),
   async (req, res) => {
     const { query, currentCourse } = req;
-    const students = await CourseStudent.findByQuery(query, currentCourse);
+    const students = await CourseStudent.findByQuery(query, currentCourse.id);
     res.send(students);
   }
 );

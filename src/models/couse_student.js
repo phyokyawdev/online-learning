@@ -87,7 +87,7 @@ studentSchema.statics.findByToken = async function (body, course) {
 };
 
 studentSchema.statics.findByUserAndCourse = async function (user, course) {
-  const student = await this.findOne({ user: user, course: course });
+  const student = await this.findOne({ user, course });
   return student;
 };
 
@@ -99,11 +99,13 @@ studentSchema.methods.updateBody = async function (body) {
   if (completed) this.completed = completed;
   if (credit) this.credit = credit;
   await this.save();
+  return this;
 };
 
 studentSchema.methods.enroll = async function (user) {
   this.user = user;
   await this.save();
+  return this;
 };
 
 studentSchema.methods.isLectureAccessible = function () {
