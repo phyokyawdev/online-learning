@@ -55,6 +55,7 @@ const studentSchema = new mongoose.Schema(
 
 studentSchema.index({ token: 1, course: 1 }, { unique: true });
 
+/** Static methods */
 studentSchema.statics.findByIdString = async function (id) {
   if (!mongoose.isValidObjectId(id)) return false;
   const student = await this.findById(id);
@@ -92,6 +93,12 @@ studentSchema.statics.isLectureAccessible = async function (user, course) {
   return true;
 };
 
+studentSchema.statics.findByUserAndCourse = async function (user, course) {
+  const student = await this.findOne({ user, course });
+  return student;
+};
+
+/** Instance methods */
 studentSchema.methods.updateBody = async function (body) {
   const { lecture_access_deadline, completed, credit } = body;
   if (lecture_access_deadline)
