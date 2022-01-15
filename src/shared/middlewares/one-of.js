@@ -1,15 +1,15 @@
+const express = require("express");
+
 /**
- * Return middleware that pass req to next if one of middlewares pass
- * call next with provided error obj if all middlewares failed.
- * @param {*} middlewares - which throw error or call next
- * @param {*} err - error obj to pass to next if all middlewares fail
- * @returns middleware
+ * Executes middlewares sequentially.
+ * Pass req to next handler if one of the middlewares is passed.
  *
  *
- * can also use for of loop
- * also need support for async middlewares
- * const AsyncFunction = (async () => {}).constructor;
- * if(f instanceof AsyncFunction === true)
+ * Upon failure of all middlewares, call next with provided err
+ * or error thrown by the last middleware.
+ * @param {[express.RequestHandler]} middlewares
+ * @param {*} [err]
+ * @returns {express.RequestHandler} middleware
  */
 const oneOf = (middlewares, err) => async (req, res, next) => {
   const errors = await middlewares.reduce(async (acc, elt) => {
@@ -23,6 +23,7 @@ const oneOf = (middlewares, err) => async (req, res, next) => {
   }, Promise.resolve([]));
 
   if (errors.length < middlewares.length) next();
+  else if (!err) next(errors[errors.length - 1]);
   else next(err);
 };
 
