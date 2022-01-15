@@ -11,13 +11,10 @@ const {
   AssignmentQuestion,
   createRules,
 } = require("@models/assignment_question");
-const { ForbiddenError, NotFoundError } = require("@shared/errors");
+const { NotFoundError } = require("@shared/errors");
 
 /** Custom middleware */
-const allowStudentOrOwner = oneOf(
-  [allowCourseStudent, allowCourseOwner],
-  new ForbiddenError("only course student or owner is allowed.")
-);
+const allowOwnerOrStudent = oneOf([allowCourseOwner, allowCourseStudent]);
 
 /**
  * req.question will be available in
@@ -42,7 +39,7 @@ router.post(
   }
 );
 
-router.get("/", allowStudentOrOwner, async (req, res) => {
+router.get("/", allowOwnerOrStudent, async (req, res) => {
   const { query, currentCourse } = req;
   const questions = await AssignmentQuestion.findByQuery(
     query,
@@ -51,7 +48,7 @@ router.get("/", allowStudentOrOwner, async (req, res) => {
   res.send(questions);
 });
 
-router.get("/:id", allowStudentOrOwner, async (req, res) => {
+router.get("/:id", allowOwnerOrStudent, async (req, res) => {
   const { question } = req;
   res.send(question);
 });

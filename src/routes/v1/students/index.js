@@ -20,6 +20,20 @@ const {
 } = require("@models/couse_student");
 
 /**
+ * check if current user is student himself.
+ * @param {express.Request & {user} & {student}} req
+ * @param {express.Response} _res
+ * @param {express.NextFunction} next
+ */
+function allowStudentHimself(req, _res, next) {
+  const { user, student } = req;
+  if (!(student && student.isStudentHimself(user.id)))
+    throw new ForbiddenError("Only student himself is allowed.");
+
+  next();
+}
+
+/**
  * req.student will be available in
  * all route handlers with id param.
  */
@@ -92,19 +106,5 @@ router.patch("/", validateRequest(enrollRules), async (req, res) => {
   await position.enroll(user.id);
   res.send(position);
 });
-
-/**
- * check if current user is student himself.
- * @param {express.Request & {user} & {student}} req
- * @param {express.Response} _res
- * @param {express.NextFunction} next
- */
-function allowStudentHimself(req, _res, next) {
-  const { user, student } = req;
-  if (!(student && student.isStudentHimself(user.id)))
-    throw new ForbiddenError("Only student himself is allowed.");
-
-  next();
-}
 
 module.exports = router;
