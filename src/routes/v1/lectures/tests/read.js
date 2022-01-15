@@ -34,7 +34,8 @@ describe("GET", () => {
 
     it("should return lectures if accessible student", async () => {
       const student_res = await global.newStudent(courseRes);
-      courseOwnerCookie = student_res.get("Set-Cookie");
+      const enroll_user_res = await global.enrollNewUser(student_res);
+      courseOwnerCookie = enroll_user_res.get("Set-Cookie");
       const res = await exec();
       expect(res.status).toBe(200);
     });
@@ -91,7 +92,8 @@ describe("GET", () => {
 
     it("should return lecture if accessible student", async () => {
       const student_res = await global.newStudent(courseRes);
-      courseOwnerCookie = student_res.get("Set-Cookie");
+      const enroll_user_res = await global.enrollNewUser(student_res);
+      courseOwnerCookie = enroll_user_res.get("Set-Cookie");
       const res = await exec();
       expect(res.status).toBe(200);
     });

@@ -189,6 +189,20 @@ async function newQuestion(courseRes) {
   return res;
 }
 
+async function enrollNewUser(studentRes) {
+  const courseId = studentRes.body.course.id;
+  const userCookie = await getNewUserCookie();
+
+  const res = await request(app)
+    .patch(`${COURSES_PATH}/${courseId}/students`)
+    .set("Cookie", userCookie)
+    .send({ token: studentRes.body.token })
+    .expect(200);
+
+  res.headers["set-cookie"] = userCookie;
+  return res;
+}
+
 /**
  * Functions that will return cookie
  * =================================
@@ -223,4 +237,5 @@ global.newTag = newTag;
 global.newCourse = newCourse;
 global.newLecture = newLecture;
 global.newStudent = newStudent;
+global.enrollNewUser = enrollNewUser;
 global.newQuestion = newQuestion;
