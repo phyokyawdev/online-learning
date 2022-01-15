@@ -5,10 +5,36 @@ const {
   allowCourseOwner,
   validateRequest,
   oneOf,
-  allowLectureAccessibleStudent,
 } = require("@shared/middlewares");
 const { Lecture, createRules, readRules } = require("@models/lecture");
+const { CourseStudent } = require("@models/couse_student");
 const { NotFoundError, ForbiddenError } = require("@shared/errors");
+
+/**
+ * middleware that check if current user is accessible to
+ * the lectures of the course
+ * @param {express.Request & {user} & {currentCourse}} req
+ * @param {express.Response} _res
+ * @param {express.NextFunction} next
+ */
+async function allowLectureAccessibleStudent(req, _res, next) {
+  const { user, currentCourse } = req;
+  const student = await CourseStudent.findByUserAndCourse(
+    user.id,
+    currentCourse.id
+  );
+  if (!student)
+    throw new ForbiddenError("You need to be student to access lecture.");
+
+  if (!student.isLectureAccessible())
+    throw new ForbiddenError("Lecture access expired.");
+  next();
+}
+
+const allowOwnerOrAccessibleStudent = oneOf([
+  allowCourseOwner,
+  allowLectureAccessibleStudent,
+]);
 
 /**
  * req.lecture will be available in
@@ -34,10 +60,7 @@ router.post(
 
 router.get(
   "/",
-  oneOf(
-    [allowCourseOwner, allowLectureAccessibleStudent],
-    new ForbiddenError("Only course owner or accessible student is allowed")
-  ),
+  allowOwnerOrAccessibleStudent,
   validateRequest(readRules),
   async (req, res) => {
     const { query, currentCourse } = req;
@@ -46,17 +69,10 @@ router.get(
   }
 );
 
-router.get(
-  "/:id",
-  oneOf(
-    [allowCourseOwner, allowLectureAccessibleStudent],
-    new ForbiddenError("Only course owner or accessible student is allowed")
-  ),
-  async (req, res) => {
-    const { lecture } = req;
-    res.send(lecture);
-  }
-);
+router.get("/:id", allowOwnerOrAccessibleStudent, async (req, res) => {
+  const { lecture } = req;
+  res.send(lecture);
+});
 
 router.put(
   "/:id",

@@ -1,4 +1,4 @@
-const { isPast } = require("date-fns");
+const { isFuture } = require("date-fns");
 const { body, query } = require("express-validator");
 const mongoose = require("mongoose");
 
@@ -86,15 +86,8 @@ studentSchema.statics.findByToken = async function (body, course) {
   return student;
 };
 
-studentSchema.statics.isLectureAccessible = async function (user, course) {
-  const student = await this.findOne({ user, course });
-  if (!student) return false;
-  if (isPast(student.lecture_access_deadline)) return false;
-  return true;
-};
-
 studentSchema.statics.findByUserAndCourse = async function (user, course) {
-  const student = await this.findOne({ user, course });
+  const student = await this.findOne({ user: user, course: course });
   return student;
 };
 
@@ -108,13 +101,17 @@ studentSchema.methods.updateBody = async function (body) {
   await this.save();
 };
 
-studentSchema.methods.isTokenUsed = function () {
-  return this.user;
-};
-
 studentSchema.methods.enroll = async function (user) {
   this.user = user;
   await this.save();
+};
+
+studentSchema.methods.isLectureAccessible = function () {
+  return isFuture(this.lecture_access_deadline);
+};
+
+studentSchema.methods.isTokenUsed = function () {
+  return this.user;
 };
 
 studentSchema.methods.isStudentHimself = function (id) {
