@@ -6,7 +6,7 @@ const auth = require("./auth");
 const allowAdmin = require("./allow-admin");
 const allowTeacher = require("./allow-teacher");
 const allowCourseOwner = require("./allow-course-owner");
-const allowCourseStudent = require("./allow-course-student");
+const allowCourseEnrolled = require("./allow-course-enrolled");
 const oneOf = require("./one-of");
 const errorHandler = require("./error-handler");
 const validatePath = require("./validate-path");
@@ -17,7 +17,7 @@ module.exports = {
   allowAdmin,
   allowTeacher,
   allowCourseOwner,
-  allowCourseStudent,
+  allowCourseEnrolled,
   oneOf,
   errorHandler,
   validatePath,

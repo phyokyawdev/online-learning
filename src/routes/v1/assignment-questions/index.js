@@ -4,7 +4,7 @@ const router = express.Router();
 const {
   allowCourseOwner,
   validateRequest,
-  allowCourseStudent,
+  allowCourseEnrolled,
   oneOf,
 } = require("@shared/middlewares");
 const {
@@ -13,8 +13,8 @@ const {
 } = require("@models/assignment_question");
 const { NotFoundError } = require("@shared/errors");
 
-/** Custom middleware */
-const allowOwnerOrStudent = oneOf([allowCourseOwner, allowCourseStudent]);
+/** Custom middlewares */
+const allowOwnerOrEnrolled = oneOf([allowCourseOwner, allowCourseEnrolled]);
 
 /**
  * req.question will be available in
@@ -39,7 +39,7 @@ router.post(
   }
 );
 
-router.get("/", allowOwnerOrStudent, async (req, res) => {
+router.get("/", allowOwnerOrEnrolled, async (req, res) => {
   const { query, currentCourse } = req;
   const questions = await AssignmentQuestion.findByQuery(
     query,
@@ -48,7 +48,7 @@ router.get("/", allowOwnerOrStudent, async (req, res) => {
   res.send(questions);
 });
 
-router.get("/:id", allowOwnerOrStudent, async (req, res) => {
+router.get("/:id", allowOwnerOrEnrolled, async (req, res) => {
   const { question } = req;
   res.send(question);
 });
