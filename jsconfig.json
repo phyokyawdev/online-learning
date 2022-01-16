@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "@*": ["src/*"]
+      "@app": ["./src/app.js"],
+      "@models/*": ["./src/models/*"],
+      "@shared/*": ["./src/shared/*"]
     }
   },
   "exclude": ["node_modules"]
