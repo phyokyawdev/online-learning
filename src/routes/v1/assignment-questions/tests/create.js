@@ -16,7 +16,7 @@ describe("POST", () => {
 
   const exec = () => {
     return request(app)
-      .post(`${PARENT_PATH}/${courseId}/assignment_questions`)
+      .post(`${PARENT_PATH}/${courseId}/assignment-questions`)
       .set("Cookie", courseOwnerCookie)
       .send({ index, title, content });
   };

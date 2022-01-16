@@ -11,7 +11,7 @@ const tagsRouter = require("./tags");
 const coursesRouter = require("./courses");
 const lecturesRouter = require("./lectures");
 const studentsRouter = require("./students");
-const assignmentQuestions = require("./assignment_questions");
+const assignmentQuestions = require("./assignment-questions");
 
 /**
  * Request param handler for courseId
@@ -45,6 +45,6 @@ router.use("/courses", coursesRouter);
 
 router.use("/courses/:courseId/lectures", lecturesRouter);
 router.use("/courses/:courseId/students", studentsRouter);
-router.use("/courses/:courseId/assignment_questions", assignmentQuestions);
+router.use("/courses/:courseId/assignment-questions", assignmentQuestions);
 
 module.exports = router;

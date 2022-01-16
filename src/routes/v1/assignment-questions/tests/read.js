@@ -13,7 +13,7 @@ describe("GET", () => {
 
   const exec = () => {
     return request(app)
-      .get(`${PARENT_PATH}/${courseId}/assignment_questions/${questionId}`)
+      .get(`${PARENT_PATH}/${courseId}/assignment-questions/${questionId}`)
       .set("Cookie", courseOwnerCookie)
       .send();
   };

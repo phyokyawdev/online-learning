@@ -16,7 +16,7 @@ describe("DELETE", () => {
 
   const exec = () => {
     return request(app)
-      .delete(`${PARENT_PATH}/${courseId}/assignment_questions/${questionId}`)
+      .delete(`${PARENT_PATH}/${courseId}/assignment-questions/${questionId}`)
       .set("Cookie", courseOwnerCookie)
       .send();
   };

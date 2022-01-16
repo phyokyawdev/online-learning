@@ -180,7 +180,7 @@ async function newQuestion(courseRes) {
   };
 
   const res = await request(app)
-    .post(`${COURSES_PATH}/${courseId}/assignment_questions`)
+    .post(`${COURSES_PATH}/${courseId}/assignment-questions`)
     .set("Cookie", courseOwnerCookie)
     .send(question)
     .expect(201);

@@ -21,7 +21,7 @@ describe("PUT", () => {
 
   const exec = () => {
     return request(app)
-      .put(`${PARENT_PATH}/${courseId}/assignment_questions/${questionId}`)
+      .put(`${PARENT_PATH}/${courseId}/assignment-questions/${questionId}`)
       .set("Cookie", courseOwnerCookie)
       .send(question);
   };

@@ -2,8 +2,8 @@ const request = require("supertest");
 const app = require("@app");
 const PARENT_PATH = "/v1/courses";
 
-describe("/v1/courses/{courseId}/assignment_questions", () => {
-  describe("test assignment_questions router", () => {
+describe("/v1/courses/{courseId}/assignment-questions", () => {
+  describe("test assignment-questions router", () => {
     let courseId, userCookie;
 
     beforeEach(async () => {
@@ -14,7 +14,7 @@ describe("/v1/courses/{courseId}/assignment_questions", () => {
 
     const exec = () => {
       return request(app)
-        .get(`${PARENT_PATH}/${courseId}/lectures`)
+        .get(`${PARENT_PATH}/${courseId}/assignment-questions`)
         .set("Cookie", userCookie)
         .send();
     };
