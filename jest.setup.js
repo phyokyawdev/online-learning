@@ -169,6 +169,20 @@ async function newStudent(courseRes) {
   return res;
 }
 
+async function enrollNewUser(studentRes) {
+  const courseId = studentRes.body.course;
+  const userCookie = await getNewUserCookie();
+
+  const res = await request(app)
+    .patch(`${COURSES_PATH}/${courseId}/students`)
+    .set("Cookie", userCookie)
+    .send({ token: studentRes.body.token })
+    .expect(200);
+
+  res.headers["set-cookie"] = userCookie;
+  return res;
+}
+
 async function newQuestion(courseRes) {
   const courseOwnerCookie = courseRes.get("Set-Cookie");
   const courseId = courseRes.body.id;
@@ -189,17 +203,30 @@ async function newQuestion(courseRes) {
   return res;
 }
 
-async function enrollNewUser(studentRes) {
-  const courseId = studentRes.body.course;
-  const userCookie = await getNewUserCookie();
+async function newAnswer(questionRes) {
+  const courseId = questionRes.body.course;
+  const questionId = questionRes.body.id;
+  const answer = { content: `This is answer for ${questionId}` };
+
+  // enrolled user
+  const existing_course_res = await request(app)
+    .get(`${COURSES_PATH}/${courseId}`)
+    .send();
+  existing_course_res.headers["set-cookie"] = questionRes.get("Set-Cookie");
+  const student_res = await newStudent(existing_course_res);
+  const enroll_user_res = await enrollNewUser(student_res);
+
+  const enrolledUserCookie = enroll_user_res.get("Set-Cookie");
 
   const res = await request(app)
-    .patch(`${COURSES_PATH}/${courseId}/students`)
-    .set("Cookie", userCookie)
-    .send({ token: studentRes.body.token })
-    .expect(200);
+    .post(
+      `${COURSES_PATH}/${courseId}/assignment-questions/${questionId}/assignment-answers`
+    )
+    .set("Cookie", enrolledUserCookie)
+    .send(answer)
+    .expect(201);
 
-  res.headers["set-cookie"] = userCookie;
+  res.headers["set-cookie"] = enrolledUserCookie;
   return res;
 }
 
@@ -239,3 +266,4 @@ global.newLecture = newLecture;
 global.newStudent = newStudent;
 global.enrollNewUser = enrollNewUser;
 global.newQuestion = newQuestion;
+global.newAnswer = newAnswer;
