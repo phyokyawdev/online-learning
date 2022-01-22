@@ -9,7 +9,6 @@ const allowCourseOwner = require("./allow-course-owner");
 const allowCourseEnrolled = require("./allow-course-enrolled");
 const oneOf = require("./one-of");
 const errorHandler = require("./error-handler");
-const validatePath = require("./validate-path");
 const validateRequest = require("./validate-request");
 
 module.exports = {
@@ -20,6 +19,5 @@ module.exports = {
   allowCourseEnrolled,
   oneOf,
   errorHandler,
-  validatePath,
   validateRequest,
 };
