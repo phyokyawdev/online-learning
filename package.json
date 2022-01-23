@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon -q -r dotenv/config src/index.js",
-    "test": "jest --setupFiles dotenv/config --watchAll --no-cache"
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "jest --setupFilesAfterEnv './jest.unit.setup.js' --testMatch='**/__tests__/**/*.[jt]s?(x)'",
+    "test:integration": "jest --setupFiles dotenv/config --setupFilesAfterEnv './jest.inte.setup.js' --testMatch='**/?(*.)+(spec|test).[jt]s?(x)'"
   },
   "_moduleAliases": {
     "@app": "src/app.js",
@@ -16,8 +18,10 @@
   "jest": {
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
-      "./jest.setup.js"
+      "./jest.unit.setup.js",
+      "./jest.inte.setup.js"
     ],
+    "clearMocks": true,
     "moduleNameMapper": {
       "@app": "<rootDir>/src/app.js",
       "@models/(.*)": "<rootDir>/src/models/$1",
