@@ -8,12 +8,13 @@
  */
 async function testMiddleware(middleware, reqMock, resMock, nextMock, errType) {
   try {
-    return expect(
+    await expect(
       async () => await middleware(reqMock, resMock, nextMock)
     ).rejects.toThrow(errType);
   } catch (error) {
-    return expect(nextMock).toHaveBeenCalledWith(expect.any(errType));
+    expect(nextMock).toHaveBeenCalledWith(expect.any(errType));
   }
 }
 
 global.testMiddleware = testMiddleware;
+global.throwOrPassError = testMiddleware;
