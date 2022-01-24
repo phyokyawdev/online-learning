@@ -6,12 +6,18 @@ const { ForbiddenError } = require("@shared/errors");
  * @param {Express.Request & {user} & {currentCourse}} req
  * @param {Express.Response} _res
  * @param {Express.Next} next
- * @throws ForbiddenError
+ * @throws Error || ForbiddenError
  */
 function allowCourseOwner(req, _res, next) {
-  const { currentCourse, user } = req;
-  if (!(currentCourse && currentCourse.isOwner(user.id)))
-    throw new ForbiddenError();
+  const { user, currentCourse } = req;
+
+  if (!user) throw new Error("Use this middleware after auth.");
+
+  if (!currentCourse)
+    throw new Error("Use this middleware in routes with courseId param.");
+
+  if (!currentCourse.isOwner(user.id))
+    throw new ForbiddenError("Only course owner is allowed.");
 
   next();
 }

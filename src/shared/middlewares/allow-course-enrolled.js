@@ -1,16 +1,22 @@
+const express = require("express");
 const { CourseStudent } = require("@models/couse_student");
 const { ForbiddenError } = require("@shared/errors");
 
 /**
- * middleware that check if current user is enrolled
- * to current course.
- * @param {Express.Request & {user} & {currentCourse}} req
- * @param {Express.Response} _res
- * @param {Express.Next} next
- * @throws ForbiddenError
+ * Attach req.currentCourseStudent if current user is
+ * valid enrolled user to course.
+ * @param {express.Request & {user} & {currentCourse}} req
+ * @param {express.Response} _res
+ * @param {express.NextFunction} next
+ * @throws Error || ForbiddenError
  */
 async function allowCourseEnrolled(req, _res, next) {
   const { user, currentCourse } = req;
+  if (!user) throw new Error("Use this middleware after auth.");
+
+  if (!currentCourse)
+    throw new Error("Use this middleware in routes with courseId param.");
+
   const student = await CourseStudent.findByUserAndCourse(
     user.id,
     currentCourse.id

@@ -4,13 +4,18 @@ const { ForbiddenError } = require("@shared/errors");
 /**
  * allow teacher only middleware
  * @param {express.Request & {user: {role: string}}} req
- * @param {express.Response} res
+ * @param {express.Response} _res
  * @param {express.NextFunction} next
- * @throws ForbiddenError
+ * @throws Error || ForbiddenError
  */
-function allowTeacher(req, res, next) {
-  if (req.user && req.user.role === "teacher") return next();
-  throw new ForbiddenError();
+function allowTeacher(req, _res, next) {
+  const { user } = req;
+  if (!user) throw new Error("Use this middleware after auth.");
+
+  if (user.role !== "teacher")
+    throw new ForbiddenError("Only teacher is allowed.");
+
+  next();
 }
 
 module.exports = allowTeacher;
