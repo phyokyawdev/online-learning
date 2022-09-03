@@ -7,8 +7,8 @@
     "start": "node src/index.js",
     "dev": "nodemon -q -r dotenv/config src/index.js",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "jest --setupFilesAfterEnv './jest.unit.setup.js' --testMatch='**/__tests__/**/*.[jt]s?(x)'",
-    "test:integration": "jest --setupFiles dotenv/config --setupFilesAfterEnv './jest.integration.setup.js' --testMatch='**/?(*.)+(spec|test).[jt]s?(x)'"
+    "test:unit": "jest --setupFilesAfterEnv './test/jest.unit.setup.js' --testMatch='**/__tests__/**/*.[jt]s?(x)'",
+    "test:integration": "jest --setupFiles dotenv/config --setupFilesAfterEnv './test/jest.integration.setup.js' --testMatch='**/?(*.)+(spec|test).[jt]s?(x)'"
   },
   "_moduleAliases": {
     "@app": "src/app.js",
@@ -18,8 +18,8 @@
   "jest": {
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
-      "./jest.unit.setup.js",
-      "./jest.integration.setup.js"
+      "./test/jest.unit.setup.js",
+      "./test/jest.integration.setup.js"
     ],
     "clearMocks": true,
     "moduleNameMapper": {
@@ -45,7 +45,7 @@
   "dependencies": {
     "compression": "^1.7.4",
     "cookie-session": "^1.4.0",
-    "date-fns": "^2.28.0",
+    "date-fns": "^2.29.2",
     "express": "^4.17.1",
     "express-actuator": "^1.8.0",
     "express-async-errors": "^3.1.1",

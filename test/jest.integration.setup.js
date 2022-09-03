@@ -6,6 +6,7 @@ const { lowercase, uppercase } = require("nanoid-dictionary");
 
 const app = require("@app");
 const { User } = require("@models/user");
+const { addMonths, formatISO } = require("date-fns");
 const lowerString = customAlphabet(lowercase, 10);
 const upperString = customAlphabet(uppercase, 10);
 
@@ -156,7 +157,9 @@ async function newStudent(courseRes) {
   const courseId = courseRes.body.id;
   const student = {
     token: upperString(),
-    lecture_access_deadline: "2022-02-10",
+    lecture_access_deadline: formatISO(addMonths(new Date(), 2), {
+      representation: "date",
+    }),
   };
 
   const res = await request(app)
