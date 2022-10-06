@@ -13,19 +13,12 @@ passport.use(
   "signup",
   new Strategy(async (req, cb) => {
     try {
-      const { username, email } = req.body;
+      const { email } = req.body;
 
       const existingEmail = await User.findOne({ email });
       if (existingEmail) {
         return cb(null, false, {
           message: "Email already registered, Log in instead",
-        });
-      }
-
-      const existingUserName = await User.findOne({ username });
-      if (existingUserName) {
-        return cb(null, false, {
-          message: "Username already exists, please try another",
         });
       }
 

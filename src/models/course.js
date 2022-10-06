@@ -15,6 +15,9 @@ const { teacherValidator } = require("./user");
  */
 const courseSchema = new mongoose.Schema(
   {
+    cover_photo_link: {
+      type: String,
+    },
     title: {
       type: String,
       required: true,
@@ -81,8 +84,8 @@ courseSchema.statics.removeTagFromCourses = async function (tag, courses) {
 };
 
 courseSchema.statics.create = async function (body, teacher) {
-  const { title, content, tags } = body;
-  const course = new this({ title, content, tags, teacher });
+  const { cover_photo_link, title, content, tags } = body;
+  const course = new this({ cover_photo_link, title, content, tags, teacher });
   await course.save();
   return course;
 };
@@ -109,7 +112,8 @@ courseSchema.statics.findByIdString = async function (id) {
 
 /** Instance Methods */
 courseSchema.methods.updateBody = async function (body) {
-  const { title, content, tags } = body;
+  const { cover_photo_link, title, content, tags } = body;
+  this.cover_photo_link = cover_photo_link;
   this.title = title;
   this.content = content;
   this.tags = tags;

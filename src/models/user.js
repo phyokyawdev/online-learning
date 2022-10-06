@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const _ = require("lodash");
 const { oneOf, body, query } = require("express-validator");
 const { hashPassword, checkPasswords } = require("@shared/services/password");
 const { generateAuthToken } = require("@shared/services/auth-token");
@@ -18,7 +19,9 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 5,
       maxlength: 30,
-      unique: true,
+    },
+    googleId: {
+      type: String,
     },
     email: {
       type: String,
@@ -28,7 +31,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return !this.googleId;
+      },
       minlength: 8,
       maxlength: 1024,
     },
@@ -36,6 +41,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["basic", "admin", "teacher"],
       default: "basic",
+    },
+    userinfo: {
+      profile_link: String,
+      headline: String,
+      bio: String,
+      socials: [String],
     },
   },
   {
@@ -68,13 +79,28 @@ userSchema.methods.checkPassword = async function (suppliedPassword) {
 userSchema.methods.generateAuthToken = async function () {
   const payload = {
     id: this._id,
+    username: this.username,
+    googleId: this.googleId,
+    email: this.email,
     role: this.role,
+    userinfo: this.userinfo,
   };
   const token = await generateAuthToken(payload);
   return token;
 };
 
-userSchema.methods.updateBody = async function (body) {
+userSchema.methods.updateUserInfo = async function (
+  profile_link,
+  headline,
+  bio,
+  socials
+) {
+  this.userinfo = { profile_link, headline, bio, socials };
+  await this.save();
+  return this;
+};
+
+userSchema.methods.updateUserRole = async function (body) {
   const { role } = body;
   this.role = role;
   await this.save();
@@ -84,8 +110,18 @@ userSchema.methods.updateBody = async function (body) {
 /** Static methods */
 userSchema.statics.create = async function (body) {
   const { username, email, password } = body;
-  const user = new this({ username, email, password });
-  await user.save();
+  let user = new this({ username, email, password });
+  user = await user.save();
+  return user;
+};
+
+userSchema.statics.createWithGoogle = async function (
+  username,
+  email,
+  googleId
+) {
+  let user = new this({ username, email, googleId });
+  user = await user.save();
   return user;
 };
 

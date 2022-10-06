@@ -32,20 +32,14 @@ describe("POST", () => {
     expect(res.status).toBe(400);
   });
 
-  it("should return 409 if tag already exist", async () => {
-    await exec().expect(201);
-    const res = await exec();
-    expect(res.status).toBe(409);
-  });
-
-  it("should return 201 with tag upon success", async () => {
-    const res = await exec().expect(201);
+  it("should return 200 with tag upon success", async () => {
+    const res = await exec().expect(200);
     expect(res.body.name).toMatch(name);
   });
 
   it("should change uppercase name to lowercase", async () => {
     name = "Backend";
-    const res = await exec().expect(201);
+    const res = await exec().expect(200);
     expect(res.body.name).toMatch("backend");
   });
 });

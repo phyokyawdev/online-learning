@@ -57,17 +57,14 @@ tagSchema.statics.findByIdString = async function (id) {
   return tag;
 };
 
-tagSchema.statics.isExisting = async function (body) {
+tagSchema.statics.createIfNotExist = async function (body) {
   const { name } = body;
-  const tag = await this.findOne({ name });
-  if (!tag) return false;
-  return true;
-};
+  let tag = await this.findOne({ name });
 
-tagSchema.statics.create = async function (body) {
-  const { name } = body;
-  let tag = new this({ name });
-  tag = await tag.save();
+  if (!tag) {
+    tag = new this({ name });
+    tag = await tag.save();
+  }
   return tag;
 };
 
@@ -88,7 +85,6 @@ const createRules = [
     .trim()
     .notEmpty()
     .bail()
-    .isAlpha()
     .toLowerCase()
     .isLength({ max: 35 }),
 ];

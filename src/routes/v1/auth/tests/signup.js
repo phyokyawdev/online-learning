@@ -36,13 +36,6 @@ describe("/signup", () => {
     expect(res1.status).toBe(409);
   });
 
-  it("should returns 409 if username is duplicated", async () => {
-    const res = await exec();
-    email = "test2@test.com";
-    const res1 = await exec();
-    expect(res1.status).toBe(409);
-  });
-
   it("should returns 201 if valid input is provided", async () => {
     const res = await exec();
     expect(res.status).toBe(201);

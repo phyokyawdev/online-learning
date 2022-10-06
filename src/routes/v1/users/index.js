@@ -9,6 +9,9 @@ const {
 } = require("@shared/middlewares");
 const { NotFoundError, ForbiddenError } = require("@shared/errors");
 const { User, readRules, updateRules } = require("@models/user");
+const { setAuthTokenToRequest } = require("@shared/services/auth-token");
+const { signUploadWidget } = require("@shared/services/file-storage");
+const { CLOUDINARY_HOST, CLOUDINARY_API_KEY } = process.env;
 
 /**
  * Only logged in users can access
@@ -51,10 +54,41 @@ router.patch(
   validateRequest(updateRules),
   async (req, res) => {
     const { currentUser, body } = req;
-    await currentUser.updateBody(body);
+    await currentUser.updateUserRole(body);
     res.send(currentUser);
   }
 );
+
+/**
+ *  return signed photo upload data
+ */
+router.get("/:id/profile-image-upload", allowUserHimself, async (req, res) => {
+  const folder = "online-learning/profile_image";
+  const sig = signUploadWidget({ folder });
+
+  const signedUploadData = {
+    url: `https://api.cloudinary.com/v1_1/${CLOUDINARY_HOST}/image/upload`,
+    api_key: CLOUDINARY_API_KEY,
+    folder,
+    timestamp: sig.timestamp,
+    signature: sig.signature,
+  };
+
+  res.send(signedUploadData);
+});
+
+// update user userinfo
+router.patch("/:id/userinfo", allowUserHimself, async (req, res) => {
+  const { currentUser, body } = req;
+  const { profile_link, headline, bio, socials } = body;
+  await currentUser.updateUserInfo(profile_link, headline, bio, socials);
+
+  // update cookie
+  const token = await currentUser.generateAuthToken();
+  setAuthTokenToRequest(req, token);
+
+  res.send(currentUser);
+});
 
 /**
  * check if logged in user is currentUser himself.

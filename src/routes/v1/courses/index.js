@@ -9,6 +9,7 @@ const {
 } = require("@shared/middlewares");
 const { Course, createRules, readRules } = require("@models/course");
 const { NotFoundError } = require("@shared/errors");
+const { createSignedUpload } = require("@shared/services/file-storage");
 
 /**
  * req.currentCourse will be available in
@@ -19,6 +20,11 @@ router.param("id", async (req, _res, next, id) => {
   if (!course) throw new NotFoundError("Course not exist.");
   req.currentCourse = course;
   next();
+});
+
+router.get("/image-presigned-url", auth, allowTeacher, async (req, res) => {
+  const presignedUrlData = createSignedUpload("online-learning/course_images");
+  res.send(presignedUrlData);
 });
 
 router.post(

@@ -28,11 +28,8 @@ router.post(
   validateRequest(createRules),
   async (req, res) => {
     const { body } = req;
-    const isExisting = await Tag.isExisting(body);
-    if (isExisting) throw new ConflictError();
-
-    const tag = await Tag.create(body);
-    res.status(201).send(tag);
+    const tag = await Tag.createIfNotExist(body);
+    res.send(tag);
   }
 );
 
